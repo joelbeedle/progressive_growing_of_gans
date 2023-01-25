@@ -15,10 +15,10 @@ import tfutil
 # Parse individual image from a tfrecords file.
 
 def parse_tfrecord_tf(record):
-    features = tf.parse_single_example(record, features={
-        'shape': tf.FixedLenFeature([3], tf.int64),
-        'data': tf.FixedLenFeature([], tf.string)})
-    data = tf.decode_raw(features['data'], tf.uint8)
+    features = tf.compat.v1.parse_single_example(record, features={
+        'shape': tf.compat.v1.FixedLenFeature([3], tf.int64),
+        'data': tf.compat.v1.FixedLenFeature([], tf.string)})
+    data = tf.compat.v1.decode_raw(features['data'], tf.uint8)
     return tf.reshape(data, features['shape'])
 
 def parse_tfrecord_np(record):
@@ -69,8 +69,8 @@ class TFRecordDataset:
         assert len(tfr_files) >= 1
         tfr_shapes = []
         for tfr_file in tfr_files:
-            tfr_opt = tf.python_io.TFRecordOptions(tf.python_io.TFRecordCompressionType.NONE)
-            for record in tf.python_io.tf_record_iterator(tfr_file, tfr_opt):
+            tfr_opt = tf.io.TFRecordOptions(compression_type=None)
+            for record in tf.compat.v1.io.tf_record_iterator(tfr_file, tfr_opt):
                 tfr_shapes.append(parse_tfrecord_np(record).shape)
                 break
 
@@ -108,17 +108,17 @@ class TFRecordDataset:
 
         # Build TF expressions.
         with tf.name_scope('Dataset'), tf.device('/cpu:0'):
-            self._tf_minibatch_in = tf.placeholder(tf.int64, name='minibatch_in', shape=[])
+            self._tf_minibatch_in = tf.compat.v1.placeholder(tf.int64, name='minibatch_in', shape=[])
             tf_labels_init = tf.zeros(self._np_labels.shape, self._np_labels.dtype)
-            self._tf_labels_var = tf.Variable(tf_labels_init, name='labels_var')
+            self._tf_labels_var = tf.compat.v1.Variable(tf_labels_init, name='labels_var')
             tfutil.set_vars({self._tf_labels_var: self._np_labels})
-            self._tf_labels_dataset = tf.data.Dataset.from_tensor_slices(self._tf_labels_var)
+            self._tf_labels_dataset = tf.compat.v1.data.Dataset.from_tensor_slices(self._tf_labels_var)
             for tfr_file, tfr_shape, tfr_lod in zip(tfr_files, tfr_shapes, tfr_lods):
                 if tfr_lod < 0:
                     continue
-                dset = tf.data.TFRecordDataset(tfr_file, compression_type='', buffer_size=buffer_mb<<20)
+                dset = tf.compat.v1.data.TFRecordDataset(tfr_file, compression_type='', buffer_size=buffer_mb<<20)
                 dset = dset.map(parse_tfrecord_tf, num_parallel_calls=num_threads)
-                dset = tf.data.Dataset.zip((dset, self._tf_labels_dataset))
+                dset = tf.compat.v1.data.Dataset.zip((dset, self._tf_labels_dataset))
                 bytes_per_item = np.prod(tfr_shape) * np.dtype(self.dtype).itemsize
                 if shuffle_mb > 0:
                     dset = dset.shuffle(((shuffle_mb << 20) - 1) // bytes_per_item + 1)
@@ -128,7 +128,7 @@ class TFRecordDataset:
                     dset = dset.prefetch(((prefetch_mb << 20) - 1) // bytes_per_item + 1)
                 dset = dset.batch(self._tf_minibatch_in)
                 self._tf_datasets[tfr_lod] = dset
-            self._tf_iterator = tf.data.Iterator.from_structure(self._tf_datasets[0].output_types, self._tf_datasets[0].output_shapes)
+            self._tf_iterator = tf.compat.v1.data.Iterator.from_structure(self._tf_datasets[0].output_types, self._tf_datasets[0].output_shapes)
             self._tf_init_ops = {lod: self._tf_iterator.make_initializer(dset) for lod, dset in self._tf_datasets.items()}
 
     # Use the given minibatch size and level-of-detail for the data returned by get_minibatch_tf().
@@ -154,7 +154,7 @@ class TFRecordDataset:
     # Get random labels as TensorFlow expression.
     def get_random_labels_tf(self, minibatch_size): # => labels
         if self.label_size > 0:
-            return tf.gather(self._tf_labels_var, tf.random_uniform([minibatch_size], 0, self._np_labels.shape[0], dtype=tf.int32))
+            return tf.gather(self._tf_labels_var, tf.compat.v1.random_uniform([minibatch_size], 0, self._np_labels.shape[0], dtype=tf.int32))
         else:
             return tf.zeros([minibatch_size, 0], self.label_dtype)
 

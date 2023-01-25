@@ -61,7 +61,7 @@ def process_reals(x, lod, mirror_augment, drange_data, drange_net):
         if mirror_augment:
             with tf.name_scope('MirrorAugment'):
                 s = tf.shape(x)
-                mask = tf.random_uniform([s[0], 1, 1, 1], 0.0, 1.0)
+                mask = tf.compat.v1.random_uniform([s[0], 1, 1, 1], 0.0, 1.0)
                 mask = tf.tile(mask, [1, s[1], s[2], s[3]])
                 x = tf.where(mask < 0.5, x, tf.reverse(x, axis=[3]))
         with tf.name_scope('FadeLOD'): # Smooth crossfade between consecutive levels-of-detail.
@@ -166,9 +166,9 @@ def train_progressive_gan(
 
     print('Building TensorFlow graph...')
     with tf.name_scope('Inputs'):
-        lod_in          = tf.placeholder(tf.float32, name='lod_in', shape=[])
-        lrate_in        = tf.placeholder(tf.float32, name='lrate_in', shape=[])
-        minibatch_in    = tf.placeholder(tf.int32, name='minibatch_in', shape=[])
+        lod_in          = tf.compat.v1.placeholder(tf.float32, name='lod_in', shape=[])
+        lrate_in        = tf.compat.v1.placeholder(tf.float32, name='lrate_in', shape=[])
+        minibatch_in    = tf.compat.v1.placeholder(tf.int32, name='minibatch_in', shape=[])
         minibatch_split = minibatch_in // config.num_gpus
         reals, labels   = training_set.get_minibatch_tf()
         reals_split     = tf.split(reals, config.num_gpus)
@@ -179,7 +179,7 @@ def train_progressive_gan(
         with tf.name_scope('GPU%d' % gpu), tf.device('/gpu:%d' % gpu):
             G_gpu = G if gpu == 0 else G.clone(G.name + '_shadow')
             D_gpu = D if gpu == 0 else D.clone(D.name + '_shadow')
-            lod_assign_ops = [tf.assign(G_gpu.find_var('lod'), lod_in), tf.assign(D_gpu.find_var('lod'), lod_in)]
+            lod_assign_ops = [tf.compat.v1.assign(G_gpu.find_var('lod'), lod_in), tf.compat.v1.assign(D_gpu.find_var('lod'), lod_in)]
             reals_gpu = process_reals(reals_split[gpu], lod_in, mirror_augment, training_set.dynamic_range, drange_net)
             labels_gpu = labels_split[gpu]
             with tf.name_scope('G_loss'), tf.control_dependencies(lod_assign_ops):
@@ -200,9 +200,9 @@ def train_progressive_gan(
     result_subdir = misc.create_result_subdir(config.result_dir, config.desc)
     misc.save_image_grid(grid_reals, os.path.join(result_subdir, 'reals.png'), drange=training_set.dynamic_range, grid_size=grid_size)
     misc.save_image_grid(grid_fakes, os.path.join(result_subdir, 'fakes%06d.png' % 0), drange=drange_net, grid_size=grid_size)
-    summary_log = tf.summary.FileWriter(result_subdir)
+    summary_log = tf.compat.v1.summary.FileWriter(result_subdir)
     if save_tf_graph:
-        summary_log.add_graph(tf.get_default_graph())
+        summary_log.add_graph(tf.compat.v1.get_default_graph())
     if save_weight_histograms:
         G.setup_weight_histograms(); D.setup_weight_histograms()
 
@@ -276,6 +276,7 @@ def train_progressive_gan(
 # Calls the function indicated in config.py.
 
 if __name__ == "__main__":
+    tf.compat.v1.disable_v2_behavior()
     misc.init_output_logging()
     np.random.seed(config.random_seed)
     print('Initializing TensorFlow...')

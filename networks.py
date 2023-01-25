@@ -24,9 +24,9 @@ def get_weight(shape, gain=np.sqrt(2), use_wscale=False, fan_in=None):
     std = gain / np.sqrt(fan_in) # He init
     if use_wscale:
         wscale = tf.constant(np.float32(std), name='wscale')
-        return tf.get_variable('weight', shape=shape, initializer=tf.initializers.random_normal()) * wscale
+        return tf.compat.v1.get_variable('weight', shape=shape, initializer=tf.initializers.random_normal()) * wscale
     else:
-        return tf.get_variable('weight', shape=shape, initializer=tf.initializers.random_normal(0, std))
+        return tf.compat.v1.get_variable('weight', shape=shape, initializer=tf.initializers.random_normal(0, std))
 
 #----------------------------------------------------------------------------
 # Fully-connected layer.
@@ -51,7 +51,7 @@ def conv2d(x, fmaps, kernel, gain=np.sqrt(2), use_wscale=False):
 # Apply bias to the given activation tensor.
 
 def apply_bias(x):
-    b = tf.get_variable('bias', shape=[x.shape[1]], initializer=tf.initializers.zeros())
+    b = tf.compat.v1.get_variable('bias', shape=[x.shape[1]], initializer=tf.initializers.zeros())
     b = tf.cast(b, x.dtype)
     if len(x.shape) == 2:
         return x + b
@@ -72,7 +72,7 @@ def leaky_relu(x, alpha=0.2):
 def upscale2d(x, factor=2):
     assert isinstance(factor, int) and factor >= 1
     if factor == 1: return x
-    with tf.variable_scope('Upscale2D'):
+    with tf.compat.v1.variable_scope('Upscale2D'):
         s = x.shape
         x = tf.reshape(x, [-1, s[1], s[2], 1, s[3], 1])
         x = tf.tile(x, [1, 1, 1, factor, 1, factor])
@@ -98,7 +98,7 @@ def upscale2d_conv2d(x, fmaps, kernel, gain=np.sqrt(2), use_wscale=False):
 def downscale2d(x, factor=2):
     assert isinstance(factor, int) and factor >= 1
     if factor == 1: return x
-    with tf.variable_scope('Downscale2D'):
+    with tf.compat.v1.variable_scope('Downscale2D'):
         ksize = [1, 1, factor, factor]
         return tf.nn.avg_pool(x, ksize=ksize, strides=ksize, padding='VALID', data_format='NCHW') # NOTE: requires tf_config['graph_options.place_pruned_graph'] = True
 
@@ -118,14 +118,14 @@ def conv2d_downscale2d(x, fmaps, kernel, gain=np.sqrt(2), use_wscale=False):
 # Pixelwise feature vector normalization.
 
 def pixel_norm(x, epsilon=1e-8):
-    with tf.variable_scope('PixelNorm'):
-        return x * tf.rsqrt(tf.reduce_mean(tf.square(x), axis=1, keepdims=True) + epsilon)
+    with tf.compat.v1.variable_scope('PixelNorm'):
+        return x * tf.compat.v1.rsqrt(tf.reduce_mean(tf.square(x), axis=1, keepdims=True) + epsilon)
 
 #----------------------------------------------------------------------------
 # Minibatch standard deviation.
 
 def minibatch_stddev_layer(x, group_size=4):
-    with tf.variable_scope('MinibatchStddev'):
+    with tf.compat.v1.variable_scope('MinibatchStddev'):
         group_size = tf.minimum(group_size, tf.shape(x)[0])     # Minibatch must be divisible by (or smaller than) group_size.
         s = x.shape                                             # [NCHW]  Input shape.
         y = tf.reshape(x, [group_size, -1, s[1], s[2], s[3]])   # [GMCHW] Split minibatch into M groups of size G.
@@ -173,33 +173,33 @@ def G_paper(
     latents_in.set_shape([None, latent_size])
     labels_in.set_shape([None, label_size])
     combo_in = tf.cast(tf.concat([latents_in, labels_in], axis=1), dtype)
-    lod_in = tf.cast(tf.get_variable('lod', initializer=np.float32(0.0), trainable=False), dtype)
+    lod_in = tf.cast(tf.compat.v1.get_variable('lod', initializer=np.float32(0.0), trainable=False), dtype)
 
     # Building blocks.
     def block(x, res): # res = 2..resolution_log2
-        with tf.variable_scope('%dx%d' % (2**res, 2**res)):
+        with tf.compat.v1.variable_scope('%dx%d' % (2**res, 2**res)):
             if res == 2: # 4x4
                 if normalize_latents: x = pixel_norm(x, epsilon=pixelnorm_epsilon)
-                with tf.variable_scope('Dense'):
+                with tf.compat.v1.variable_scope('Dense'):
                     x = dense(x, fmaps=nf(res-1)*16, gain=np.sqrt(2)/4, use_wscale=use_wscale) # override gain to match the original Theano implementation
                     x = tf.reshape(x, [-1, nf(res-1), 4, 4])
                     x = PN(act(apply_bias(x)))
-                with tf.variable_scope('Conv'):
+                with tf.compat.v1.variable_scope('Conv'):
                     x = PN(act(apply_bias(conv2d(x, fmaps=nf(res-1), kernel=3, use_wscale=use_wscale))))
             else: # 8x8 and up
                 if fused_scale:
-                    with tf.variable_scope('Conv0_up'):
+                    with tf.compat.v1.variable_scope('Conv0_up'):
                         x = PN(act(apply_bias(upscale2d_conv2d(x, fmaps=nf(res-1), kernel=3, use_wscale=use_wscale))))
                 else:
                     x = upscale2d(x)
-                    with tf.variable_scope('Conv0'):
+                    with tf.compat.v1.variable_scope('Conv0'):
                         x = PN(act(apply_bias(conv2d(x, fmaps=nf(res-1), kernel=3, use_wscale=use_wscale))))
-                with tf.variable_scope('Conv1'):
+                with tf.compat.v1.variable_scope('Conv1'):
                     x = PN(act(apply_bias(conv2d(x, fmaps=nf(res-1), kernel=3, use_wscale=use_wscale))))
             return x
     def torgb(x, res): # res = 2..resolution_log2
         lod = resolution_log2 - res
-        with tf.variable_scope('ToRGB_lod%d' % lod):
+        with tf.compat.v1.variable_scope('ToRGB_lod%d' % lod):
             return apply_bias(conv2d(x, fmaps=num_channels, kernel=1, gain=1, use_wscale=use_wscale))
 
     # Linear structure: simple but inefficient.
@@ -211,7 +211,7 @@ def G_paper(
             x = block(x, res)
             img = torgb(x, res)
             images_out = upscale2d(images_out)
-            with tf.variable_scope('Grow_lod%d' % lod):
+            with tf.compat.v1.variable_scope('Grow_lod%d' % lod):
                 images_out = lerp_clip(img, images_out, lod_in - lod)
 
     # Recursive structure: complex but efficient.
@@ -255,32 +255,32 @@ def D_paper(
 
     images_in.set_shape([None, num_channels, resolution, resolution])
     images_in = tf.cast(images_in, dtype)
-    lod_in = tf.cast(tf.get_variable('lod', initializer=np.float32(0.0), trainable=False), dtype)
+    lod_in = tf.cast(tf.compat.v1.get_variable('lod', initializer=np.float32(0.0), trainable=False), dtype)
 
     # Building blocks.
     def fromrgb(x, res): # res = 2..resolution_log2
-        with tf.variable_scope('FromRGB_lod%d' % (resolution_log2 - res)):
+        with tf.compat.v1.variable_scope('FromRGB_lod%d' % (resolution_log2 - res)):
             return act(apply_bias(conv2d(x, fmaps=nf(res-1), kernel=1, use_wscale=use_wscale)))
     def block(x, res): # res = 2..resolution_log2
-        with tf.variable_scope('%dx%d' % (2**res, 2**res)):
+        with tf.compat.v1.variable_scope('%dx%d' % (2**res, 2**res)):
             if res >= 3: # 8x8 and up
-                with tf.variable_scope('Conv0'):
+                with tf.compat.v1.variable_scope('Conv0'):
                     x = act(apply_bias(conv2d(x, fmaps=nf(res-1), kernel=3, use_wscale=use_wscale)))
                 if fused_scale:
-                    with tf.variable_scope('Conv1_down'):
+                    with tf.compat.v1.variable_scope('Conv1_down'):
                         x = act(apply_bias(conv2d_downscale2d(x, fmaps=nf(res-2), kernel=3, use_wscale=use_wscale)))
                 else:
-                    with tf.variable_scope('Conv1'):
+                    with tf.compat.v1.variable_scope('Conv1'):
                         x = act(apply_bias(conv2d(x, fmaps=nf(res-2), kernel=3, use_wscale=use_wscale)))
                     x = downscale2d(x)
             else: # 4x4
                 if mbstd_group_size > 1:
                     x = minibatch_stddev_layer(x, mbstd_group_size)
-                with tf.variable_scope('Conv'):
+                with tf.compat.v1.variable_scope('Conv'):
                     x = act(apply_bias(conv2d(x, fmaps=nf(res-1), kernel=3, use_wscale=use_wscale)))
-                with tf.variable_scope('Dense0'):
+                with tf.compat.v1.variable_scope('Dense0'):
                     x = act(apply_bias(dense(x, fmaps=nf(res-2), use_wscale=use_wscale)))
-                with tf.variable_scope('Dense1'):
+                with tf.compat.v1.variable_scope('Dense1'):
                     x = apply_bias(dense(x, fmaps=1+label_size, gain=1, use_wscale=use_wscale))
             return x
     
@@ -293,7 +293,7 @@ def D_paper(
             x = block(x, res)
             img = downscale2d(img)
             y = fromrgb(img, res - 1)
-            with tf.variable_scope('Grow_lod%d' % lod):
+            with tf.compat.v1.variable_scope('Grow_lod%d' % lod):
                 x = lerp_clip(x, y, lod_in - lod)
         combo_out = block(x, 2)
 

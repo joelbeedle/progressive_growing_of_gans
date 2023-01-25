@@ -1,0 +1,134 @@
+Initializing TensorFlow...
+Running train.train_progressive_gan()...
+Streaming data using dataset.TFRecordDataset...
+Dataset shape = [1, 32, 32]
+Dynamic range = [0, 255]
+Label size    = 0
+Constructing networks...
+
+G                           Params      OutputShape             WeightShape             
+---                         ---         ---                     ---                     
+latents_in                  -           (?, 512)                -                       
+labels_in                   -           (?, 0)                  -                       
+lod                         -           ()                      -                       
+4x4/PixelNorm               -           (?, 512)                -                       
+4x4/Dense                   4194816     (?, 512, 4, 4)          (512, 8192)             
+4x4/Conv                    2359808     (?, 512, 4, 4)          (3, 3, 512, 512)        
+ToRGB_lod3                  513         (?, 1, 4, 4)            (1, 1, 512, 1)          
+8x8/Conv0_up                2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+8x8/Conv1                   2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+ToRGB_lod2                  513         (?, 1, 8, 8)            (1, 1, 512, 1)          
+Upscale2D                   -           (?, 1, 8, 8)            -                       
+Grow_lod2                   -           (?, 1, 8, 8)            -                       
+16x16/Conv0_up              2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+16x16/Conv1                 2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+ToRGB_lod1                  513         (?, 1, 16, 16)          (1, 1, 512, 1)          
+Upscale2D_1                 -           (?, 1, 16, 16)          -                       
+Grow_lod1                   -           (?, 1, 16, 16)          -                       
+32x32/Conv0_up              2359808     (?, 512, 32, 32)        (3, 3, 512, 512)        
+32x32/Conv1                 2359808     (?, 512, 32, 32)        (3, 3, 512, 512)        
+ToRGB_lod0                  513         (?, 1, 32, 32)          (1, 1, 512, 1)          
+Upscale2D_2                 -           (?, 1, 32, 32)          -                       
+Grow_lod0                   -           (?, 1, 32, 32)          -                       
+images_out                  -           (?, 1, 32, 32)          -                       
+---                         ---         ---                     ---                     
+Total                       20715524                                                    
+
+
+D                           Params      OutputShape             WeightShape             
+---                         ---         ---                     ---                     
+images_in                   -           (?, 1, 32, 32)          -                       
+lod                         -           ()                      -                       
+FromRGB_lod0                1024        (?, 512, 32, 32)        (1, 1, 1, 512)          
+32x32/Conv0                 2359808     (?, 512, 32, 32)        (3, 3, 512, 512)        
+32x32/Conv1_down            2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+Downscale2D                 -           (?, 1, 16, 16)          -                       
+FromRGB_lod1                1024        (?, 512, 16, 16)        (1, 1, 1, 512)          
+Grow_lod0                   -           (?, 512, 16, 16)        -                       
+16x16/Conv0                 2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+16x16/Conv1_down            2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+Downscale2D_1               -           (?, 1, 8, 8)            -                       
+FromRGB_lod2                1024        (?, 512, 8, 8)          (1, 1, 1, 512)          
+Grow_lod1                   -           (?, 512, 8, 8)          -                       
+8x8/Conv0                   2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+8x8/Conv1_down              2359808     (?, 512, 4, 4)          (3, 3, 512, 512)        
+Downscale2D_2               -           (?, 1, 4, 4)            -                       
+FromRGB_lod3                1024        (?, 512, 4, 4)          (1, 1, 1, 512)          
+Grow_lod2                   -           (?, 512, 4, 4)          -                       
+4x4/MinibatchStddev         -           (?, 1, 4, 4)            -                       
+4x4/Conv                    2364416     (?, 512, 4, 4)          (3, 3, 513, 512)        
+4x4/Dense0                  4194816     (?, 512)                (8192, 512)             
+4x4/Dense1                  513         (?, 1)                  (512, 1)                
+scores_out                  -           (?, 1)                  -                       
+labels_out                  -           (?, 0)                  -                       
+---                         ---         ---                     ---                     
+Total                       20722689                                                    
+
+Building TensorFlow graph...
+Setting up snapshot image grid...
+Setting up result dir...
+Saving results to results\003-pgan-mnist-preset-v2-1gpu-fp32
+Training...
+tick 1     kimg 160.3    lod 3.00  minibatch 128  time 42s          sec/tick 42.3    sec/kimg 0.26    maintenance 12.2
+tick 2     kimg 320.5    lod 3.00  minibatch 128  time 1m 22s       sec/tick 37.7    sec/kimg 0.24    maintenance 1.6
+tick 3     kimg 480.8    lod 3.00  minibatch 128  time 2m 01s       sec/tick 39.2    sec/kimg 0.24    maintenance 0.0
+tick 4     kimg 621.1    lod 2.97  minibatch 128  time 2m 54s       sec/tick 53.4    sec/kimg 0.38    maintenance 0.0
+tick 5     kimg 761.3    lod 2.73  minibatch 128  time 4m 29s       sec/tick 95.0    sec/kimg 0.68    maintenance 0.1
+tick 6     kimg 901.6    lod 2.50  minibatch 128  time 6m 06s       sec/tick 96.1    sec/kimg 0.69    maintenance 0.1
+tick 7     kimg 1041.9   lod 2.26  minibatch 128  time 7m 42s       sec/tick 96.8    sec/kimg 0.69    maintenance 0.1
+tick 8     kimg 1182.2   lod 2.03  minibatch 128  time 9m 21s       sec/tick 98.3    sec/kimg 0.70    maintenance 0.1
+tick 9     kimg 1322.5   lod 2.00  minibatch 128  time 10m 58s      sec/tick 97.1    sec/kimg 0.69    maintenance 0.1
+tick 10    kimg 1462.8   lod 2.00  minibatch 128  time 12m 33s      sec/tick 94.7    sec/kimg 0.68    maintenance 0.1
+tick 11    kimg 1603.1   lod 2.00  minibatch 128  time 14m 08s      sec/tick 94.8    sec/kimg 0.68    maintenance 0.7
+tick 12    kimg 1743.4   lod 2.00  minibatch 128  time 15m 43s      sec/tick 94.6    sec/kimg 0.67    maintenance 0.1
+tick 13    kimg 1863.7   lod 1.89  minibatch 128  time 19m 55s      sec/tick 252.3   sec/kimg 2.10    maintenance 0.1
+tick 14    kimg 1984.0   lod 1.69  minibatch 128  time 23m 33s      sec/tick 217.5   sec/kimg 1.81    maintenance 0.2
+tick 15    kimg 2104.3   lod 1.49  minibatch 128  time 27m 26s      sec/tick 233.1   sec/kimg 1.94    maintenance 0.2
+tick 16    kimg 2224.6   lod 1.29  minibatch 128  time 31m 04s      sec/tick 217.2   sec/kimg 1.81    maintenance 0.2
+tick 17    kimg 2345.0   lod 1.09  minibatch 128  time 34m 40s      sec/tick 216.5   sec/kimg 1.80    maintenance 0.2
+tick 18    kimg 2465.3   lod 1.00  minibatch 128  time 38m 14s      sec/tick 213.8   sec/kimg 1.78    maintenance 0.2
+tick 19    kimg 2585.6   lod 1.00  minibatch 128  time 41m 46s      sec/tick 211.9   sec/kimg 1.76    maintenance 0.2
+tick 20    kimg 2705.9   lod 1.00  minibatch 128  time 45m 18s      sec/tick 211.8   sec/kimg 1.76    maintenance 0.2
+tick 21    kimg 2826.2   lod 1.00  minibatch 128  time 48m 51s      sec/tick 212.3   sec/kimg 1.76    maintenance 0.3
+tick 22    kimg 2946.6   lod 1.00  minibatch 128  time 52m 23s      sec/tick 211.8   sec/kimg 1.76    maintenance 0.2
+tick 23    kimg 3046.7   lod 0.92  minibatch 64   time 59m 03s      sec/tick 399.3   sec/kimg 3.99    maintenance 0.2
+tick 24    kimg 3146.8   lod 0.76  minibatch 64   time 1h 09m 36s   sec/tick 632.6   sec/kimg 6.32    maintenance 0.5
+tick 25    kimg 3246.8   lod 0.59  minibatch 64   time 1h 20m 23s   sec/tick 646.5   sec/kimg 6.46    maintenance 0.5
+tick 26    kimg 3346.9   lod 0.42  minibatch 64   time 1h 31m 00s   sec/tick 637.0   sec/kimg 6.36    maintenance 0.5
+tick 27    kimg 3447.0   lod 0.26  minibatch 64   time 1h 41m 40s   sec/tick 638.9   sec/kimg 6.38    maintenance 0.5
+tick 28    kimg 3547.1   lod 0.09  minibatch 64   time 1h 52m 15s   sec/tick 635.1   sec/kimg 6.34    maintenance 0.5
+tick 29    kimg 3647.2   lod 0.00  minibatch 64   time 2h 02m 45s   sec/tick 629.1   sec/kimg 6.29    maintenance 0.5
+tick 30    kimg 3747.3   lod 0.00  minibatch 64   time 2h 13m 01s   sec/tick 615.5   sec/kimg 6.15    maintenance 0.5
+tick 31    kimg 3847.4   lod 0.00  minibatch 64   time 2h 23m 18s   sec/tick 616.3   sec/kimg 6.16    maintenance 0.6
+tick 32    kimg 3947.5   lod 0.00  minibatch 64   time 2h 33m 34s   sec/tick 616.0   sec/kimg 6.15    maintenance 0.5
+tick 33    kimg 4047.6   lod 0.00  minibatch 64   time 2h 43m 51s   sec/tick 616.0   sec/kimg 6.15    maintenance 0.5
+tick 34    kimg 4147.7   lod 0.00  minibatch 64   time 2h 54m 07s   sec/tick 616.2   sec/kimg 6.16    maintenance 0.5
+tick 35    kimg 4247.8   lod 0.00  minibatch 64   time 3h 04m 24s   sec/tick 616.1   sec/kimg 6.16    maintenance 0.5
+tick 36    kimg 4347.9   lod 0.00  minibatch 64   time 3h 14m 40s   sec/tick 616.0   sec/kimg 6.15    maintenance 0.5
+tick 37    kimg 4448.0   lod 0.00  minibatch 64   time 3h 24m 57s   sec/tick 616.1   sec/kimg 6.16    maintenance 0.5
+tick 38    kimg 4548.1   lod 0.00  minibatch 64   time 3h 35m 14s   sec/tick 616.7   sec/kimg 6.16    maintenance 0.5
+tick 39    kimg 4648.2   lod 0.00  minibatch 64   time 3h 45m 31s   sec/tick 616.5   sec/kimg 6.16    maintenance 0.5
+tick 40    kimg 4748.3   lod 0.00  minibatch 64   time 3h 55m 48s   sec/tick 616.9   sec/kimg 6.16    maintenance 0.5
+tick 41    kimg 4848.4   lod 0.00  minibatch 64   time 4h 06m 08s   sec/tick 618.6   sec/kimg 6.18    maintenance 0.5
+Traceback (most recent call last):
+  File "C:\Users\beedl\OneDrive\Desktop\progressive_growing_of_gans\train.py", line 286, in <module>
+    tfutil.call_func_by_name(**config.train)
+  File "C:\Users\beedl\OneDrive\Desktop\progressive_growing_of_gans\tfutil.py", line 235, in call_func_by_name
+    return import_obj(func)(*args, **kwargs)
+  File "C:\Users\beedl\OneDrive\Desktop\progressive_growing_of_gans\train.py", line 231, in train_progressive_gan
+    tfutil.run([G_train_op], {lod_in: sched.lod, lrate_in: sched.G_lrate, minibatch_in: sched.minibatch})
+  File "C:\Users\beedl\OneDrive\Desktop\progressive_growing_of_gans\tfutil.py", line 20, in run
+    return tf.compat.v1.get_default_session().run(*args, **kwargs)
+  File "C:\Users\beedl\anaconda3\envs\GAN\lib\site-packages\tensorflow\python\client\session.py", line 968, in run
+    result = self._run(None, fetches, feed_dict, options_ptr,
+  File "C:\Users\beedl\anaconda3\envs\GAN\lib\site-packages\tensorflow\python\client\session.py", line 1191, in _run
+    results = self._do_run(handle, final_targets, final_fetches,
+  File "C:\Users\beedl\anaconda3\envs\GAN\lib\site-packages\tensorflow\python\client\session.py", line 1371, in _do_run
+    return self._do_call(_run_fn, feeds, fetches, targets, options,
+  File "C:\Users\beedl\anaconda3\envs\GAN\lib\site-packages\tensorflow\python\client\session.py", line 1378, in _do_call
+    return fn(*args)
+  File "C:\Users\beedl\anaconda3\envs\GAN\lib\site-packages\tensorflow\python\client\session.py", line 1361, in _run_fn
+    return self._call_tf_sessionrun(options, feed_dict, fetch_list,
+  File "C:\Users\beedl\anaconda3\envs\GAN\lib\site-packages\tensorflow\python\client\session.py", line 1454, in _call_tf_sessionrun
+    return tf_session.TF_SessionRun_wrapper(self._session, options, feed_dict,
+KeyboardInterrupt

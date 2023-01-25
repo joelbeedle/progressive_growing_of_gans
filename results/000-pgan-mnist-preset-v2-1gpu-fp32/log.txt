@@ -1,0 +1,78 @@
+Initializing TensorFlow...
+Running train.train_progressive_gan()...
+Streaming data using dataset.TFRecordDataset...
+Dataset shape = [1, 32, 32]
+Dynamic range = [0, 255]
+Label size    = 0
+Constructing networks...
+
+G                           Params      OutputShape             WeightShape             
+---                         ---         ---                     ---                     
+latents_in                  -           (?, 512)                -                       
+labels_in                   -           (?, 0)                  -                       
+lod                         -           ()                      -                       
+4x4/PixelNorm               -           (?, 512)                -                       
+4x4/Dense                   4194816     (?, 512, 4, 4)          (512, 8192)             
+4x4/Conv                    2359808     (?, 512, 4, 4)          (3, 3, 512, 512)        
+ToRGB_lod3                  513         (?, 1, 4, 4)            (1, 1, 512, 1)          
+8x8/Conv0_up                2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+8x8/Conv1                   2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+ToRGB_lod2                  513         (?, 1, 8, 8)            (1, 1, 512, 1)          
+Upscale2D                   -           (?, 1, 8, 8)            -                       
+Grow_lod2                   -           (?, 1, 8, 8)            -                       
+16x16/Conv0_up              2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+16x16/Conv1                 2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+ToRGB_lod1                  513         (?, 1, 16, 16)          (1, 1, 512, 1)          
+Upscale2D_1                 -           (?, 1, 16, 16)          -                       
+Grow_lod1                   -           (?, 1, 16, 16)          -                       
+32x32/Conv0_up              2359808     (?, 512, 32, 32)        (3, 3, 512, 512)        
+32x32/Conv1                 2359808     (?, 512, 32, 32)        (3, 3, 512, 512)        
+ToRGB_lod0                  513         (?, 1, 32, 32)          (1, 1, 512, 1)          
+Upscale2D_2                 -           (?, 1, 32, 32)          -                       
+Grow_lod0                   -           (?, 1, 32, 32)          -                       
+images_out                  -           (?, 1, 32, 32)          -                       
+---                         ---         ---                     ---                     
+Total                       20715524                                                    
+
+
+D                           Params      OutputShape             WeightShape             
+---                         ---         ---                     ---                     
+images_in                   -           (?, 1, 32, 32)          -                       
+lod                         -           ()                      -                       
+FromRGB_lod0                1024        (?, 512, 32, 32)        (1, 1, 1, 512)          
+32x32/Conv0                 2359808     (?, 512, 32, 32)        (3, 3, 512, 512)        
+32x32/Conv1_down            2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+Downscale2D                 -           (?, 1, 16, 16)          -                       
+FromRGB_lod1                1024        (?, 512, 16, 16)        (1, 1, 1, 512)          
+Grow_lod0                   -           (?, 512, 16, 16)        -                       
+16x16/Conv0                 2359808     (?, 512, 16, 16)        (3, 3, 512, 512)        
+16x16/Conv1_down            2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+Downscale2D_1               -           (?, 1, 8, 8)            -                       
+FromRGB_lod2                1024        (?, 512, 8, 8)          (1, 1, 1, 512)          
+Grow_lod1                   -           (?, 512, 8, 8)          -                       
+8x8/Conv0                   2359808     (?, 512, 8, 8)          (3, 3, 512, 512)        
+8x8/Conv1_down              2359808     (?, 512, 4, 4)          (3, 3, 512, 512)        
+Downscale2D_2               -           (?, 1, 4, 4)            -                       
+FromRGB_lod3                1024        (?, 512, 4, 4)          (1, 1, 1, 512)          
+Grow_lod2                   -           (?, 512, 4, 4)          -                       
+4x4/MinibatchStddev         -           (?, 1, 4, 4)            -                       
+4x4/Conv                    2364416     (?, 512, 4, 4)          (3, 3, 513, 512)        
+4x4/Dense0                  4194816     (?, 512)                (8192, 512)             
+4x4/Dense1                  513         (?, 1)                  (512, 1)                
+scores_out                  -           (?, 1)                  -                       
+labels_out                  -           (?, 0)                  -                       
+---                         ---         ---                     ---                     
+Total                       20722689                                                    
+
+Building TensorFlow graph...
+Setting up snapshot image grid...
+Setting up result dir...
+Saving results to results\000-pgan-mnist-preset-v2-1gpu-fp32
+Traceback (most recent call last):
+  File "C:\Users\beedl\OneDrive\Desktop\progressive_growing_of_gans\train.py", line 286, in <module>
+    tfutil.call_func_by_name(**config.train)
+  File "C:\Users\beedl\OneDrive\Desktop\progressive_growing_of_gans\tfutil.py", line 235, in call_func_by_name
+    return import_obj(func)(*args, **kwargs)
+  File "C:\Users\beedl\OneDrive\Desktop\progressive_growing_of_gans\train.py", line 203, in train_progressive_gan
+    summary_log = tf.summary.FileWriter(result_subdir)
+AttributeError: module 'tensorboard.summary._tf.summary' has no attribute 'FileWriter'
