@@ -434,9 +434,10 @@ def create_lsun(tfrecord_dir, lmdb_dir, resolution=256, max_images=None):
 
 def create_celeba(tfrecord_dir, celeba_dir, cx=89, cy=121):
     print('Loading CelebA from "%s"' % celeba_dir)
-    glob_pattern = os.path.join(celeba_dir, 'img_align_celeba_png', '*.png')
+    glob_pattern = os.path.join(celeba_dir, '*.jpg')
     image_filenames = sorted(glob.glob(glob_pattern))
     expected_images = 202599
+    print(len(image_filenames))
     if len(image_filenames) != expected_images:
         error('Expected to find %d images' % expected_images)
     
